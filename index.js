@@ -58,34 +58,51 @@ const blogSchema = new Schema({
 })
 const recipe = mongoose.model('foodrecipes', blogSchema)
 
-// Configure Passport.js with the JWT strategy
-passport.use(new JWTStrategy({
-    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey: JWT_SECRET
-    }, (jwtPayload, done) => {
-        const user1 = User.findById(jwtPayload.sub);
-        if (!user1) {
-            return done(null, false);
-        }
-    //done(null, jwtPayload.user); // Assuming the user information is stored in jwtPayload.user
-    done(null, user1)
-}));
+var authToken = null
+// // Configure Passport.js with the JWT strategy
+// passport.use(new JWTStrategy({
+//     jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+//     secretOrKey: JWT_SECRET
+//     }, (jwtPayload, done) => {
+//         const user1 = User.findById(jwtPayload.sub);
+//         if (!user1) {
+//             return done(null, false);
+//         }
+//     //done(null, jwtPayload.user); // Assuming the user information is stored in jwtPayload.user
+//     done(null, user1)
+// }));
 
+// const fetchUser = (req, res, next) => {
+//     passport.authenticate('jwt', { session: false }, (err, user, info) => {
+//         if (err) {
+//         return res.status(500).send({ error: 'Internal Server Error' });
+//         }
+
+//         if (!user) {
+//         return res.status(401).send({ error: 'Faulty Authentication' });
+//         }
+
+//         req.user = user;
+//         next();
+//     })(req, res, next);
+// };
 const fetchUser = (req, res, next) => {
-    passport.authenticate('jwt', { session: false }, (err, user, info) => {
-        if (err) {
-        return res.status(500).send({ error: 'Internal Server Error' });
+    try{
+        // const token = req.header(`authtoken`)
+        const token = authToken
+        if (!token) res.status(401).send({error: `Faulty Authentication`})
+
+        try{
+            const data = jwt.verify(token, JWT_SECRET)
+            req.user = data.user
+            next()
+        }catch(error){
+            res.status(401).send({error: `Faulty Authentication`})
         }
-
-        if (!user) {
-        return res.status(401).send({ error: 'Faulty Authentication' });
-        }
-
-        req.user = user;
-        next();
-    })(req, res, next);
-};
-
+    }catch(error){
+        res.status(500).send({error: `Internal Server Error`})
+    }
+}
 
 app.get("/",(req,res)=>{
     res.render("signup")
@@ -130,7 +147,7 @@ app.post(`/signup`,
                 }
             };
 
-            const authToken = jwt.sign(data, JWT_SECRET);
+            authToken = jwt.sign(data, JWT_SECRET);
 
             res.json({"success": true, "authtoken": authToken});
             res.redirect("/login");
@@ -177,7 +194,7 @@ app.post(`/login`,
                 },
             }
 
-            const authToken = jwt.sign(data, JWT_SECRET);
+            authToken = jwt.sign(data, JWT_SECRET);
 
             res.json({"success": true, "authtoken": authToken});
             res.redirect("/homepage");
@@ -301,7 +318,11 @@ app.delete(`/delete`, fetchUser, async(req, res) => {
     }
 })
 
-
+app.get("/logout", (req, res) => {
+    authToken = null
+    req.logout()
+    res.redirect("/")
+})
 app.listen(port, () => {
     console.log(`App listening on PORT: ${port}`)
 })
