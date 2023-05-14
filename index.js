@@ -36,7 +36,6 @@ const userSchema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true
     },
     password: {
         type: String, 
@@ -83,9 +82,10 @@ passport.use(new JWTStrategy({
 }));
 
 const addToken = (req, res, next) => {
-    req.headers.authToken = authToken
+    req.headers("authToken") = authToken
     next()
 }
+
 const fetchUser = (req, res, next) => {
     passport.authenticate('jwt', { session: false }, (err, user, info) => {
         if (err) {
@@ -116,7 +116,10 @@ const fetchUser = (req, res, next) => {
 
 app.get("/",(req,res)=>{
     res.render("signup")
-    console.log("done");
+})
+
+app.get("/signup", (req, res) => {
+    res.render("signup")
 })
 
 app.post(`/signup`, 
@@ -161,18 +164,13 @@ app.post(`/signup`,
 
             //res.json({"success": true, "authtoken": authToken});
             res.redirect("/login");
+            res.render("login")
         }   catch (error) {
             console.error(error);
             res.status(500).send(`Internal Server Error!!!`);
         }
     }
 );
-
-
-app.post("/login2", (req,res)=>{
-    res.redirect("/login")
-}
-)
 
 app.get("/login",(req,res)=>{
     res.render("login");
@@ -186,14 +184,14 @@ app.post(`/login`,
 ], async(req, res) => {
         try{
             const user = await User.findOne({"email": req.body.email})
-
+            console.log(user)
             if (!user)
             {
                 return res.status(400).json({"success": false})
             }
 
             const passwordComparison = await bcrypt.compare(req.body.password, user.password);
-
+            console.log(passwordComparison)
             if (!passwordComparison){
                 return res.status(400).json({"success": false})
             }
@@ -207,8 +205,9 @@ app.post(`/login`,
             authToken = jwt.sign(data, JWT_SECRET);
 
             //res.json({"success": true, "authtoken": authToken});
-            res.redirect("/homepage");
             
+            res.redirect("/homepage");
+            res.render("homepage")
         }   catch (error)   {
             console.error(error);
             res.status(500).send(`Internal Server Error!!!`);
@@ -236,7 +235,7 @@ app.get(`/getallrecipes`, addToken, fetchUser, async(req, res) => {
 })
 
 //display ALL users' blogs
-app.get("/homepage",(req,res)=>{
+app.get("/homepage",(req, res)=>{
     res.render("homepage");
 })
 
