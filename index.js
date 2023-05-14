@@ -59,46 +59,46 @@ const blogSchema = new Schema({
 const recipe = mongoose.model('foodrecipes', blogSchema)
 
 var authToken = null
-// // Configure Passport.js with the JWT strategy
-// passport.use(new JWTStrategy({
-//     jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-//     secretOrKey: JWT_SECRET
-//     }, (jwtPayload, done) => {
-//         const user1 = User.findById(jwtPayload.sub);
-//         if (!user1) {
-//             return done(null, false);
-//         }
-//     //done(null, jwtPayload.user); // Assuming the user information is stored in jwtPayload.user
-//     done(null, user1)
-// }));
+// Configure Passport.js with the JWT strategy
+passport.use(new JWTStrategy({
+    jwtFromRequest: authToken,
+    secretOrKey: JWT_SECRET
+    }, (jwtPayload, done) => {
+        const user1 = User.findById(jwtPayload.sub);
+        if (!user1) {
+            return done(null, false);
+        }
+    //done(null, jwtPayload.user); // Assuming the user information is stored in jwtPayload.user
+    done(null, user1)
+}));
 
-// const fetchUser = (req, res, next) => {
-//     passport.authenticate('jwt', { session: false }, (err, user, info) => {
-//         if (err) {
-//         return res.status(500).send({ error: 'Internal Server Error' });
-//         }
-
-//         if (!user) {
-//         return res.status(401).send({ error: 'Faulty Authentication' });
-//         }
-
-//         req.user = user;
-//         next();
-//     })(req, res, next);
-// };
 const fetchUser = (req, res, next) => {
-    // const token = req.header(`authtoken`)
-    const token = authToken
-    if (!token) res.status(401).send({error: `Faulty Authentication`})
+    passport.authenticate('jwt', { session: false }, (err, user, info) => {
+        if (err) {
+        return res.status(500).send({ error: 'Internal Server Error' });
+        }
 
-    try{
-        const data = jwt.verify(token, JWT_SECRET)
-        req.user = data.user
-        next()
-    }catch(error){
-        res.status(401)
-    }
-}
+        if (!user) {
+        return res.status(401).send({ error: 'Faulty Authentication' });
+        }
+
+        req.user = user;
+        next();
+    })(req, res, next);
+};
+// const fetchUser = (req, res, next) => {
+//     // const token = req.header(`authtoken`)
+//     const token = authToken
+//     if (!token) res.status(401).send({error: `Faulty Authentication`})
+
+//     try{
+//         const data = jwt.verify(token, JWT_SECRET)
+//         req.user = data.user
+//         next()
+//     }catch(error){
+//         res.status(401)
+//     }
+// }
 
 app.get("/",(req,res)=>{
     res.render("signup")
