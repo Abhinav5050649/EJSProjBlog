@@ -87,20 +87,16 @@ var authToken = null
 //     })(req, res, next);
 // };
 const fetchUser = (req, res, next) => {
-    try{
-        // const token = req.header(`authtoken`)
-        const token = authToken
-        if (!token) res.status(401).send({error: `Faulty Authentication`})
+    // const token = req.header(`authtoken`)
+    const token = authToken
+    if (!token) res.status(401).send({error: `Faulty Authentication`})
 
-        try{
-            const data = jwt.verify(token, JWT_SECRET)
-            req.user = data.user
-            next()
-        }catch(error){
-            res.status(401).send({error: `Faulty Authentication`})
-        }
+    try{
+        const data = jwt.verify(token, JWT_SECRET)
+        req.user = data.user
+        next()
     }catch(error){
-        res.status(500).send({error: `Internal Server Error`})
+        res.status(401)
     }
 }
 
@@ -149,7 +145,7 @@ app.post(`/signup`,
 
             authToken = jwt.sign(data, JWT_SECRET);
 
-            res.json({"success": true, "authtoken": authToken});
+            //res.json({"success": true, "authtoken": authToken});
             res.redirect("/login");
         }   catch (error) {
             console.error(error);
@@ -196,7 +192,7 @@ app.post(`/login`,
 
             authToken = jwt.sign(data, JWT_SECRET);
 
-            res.json({"success": true, "authtoken": authToken});
+            //res.json({"success": true, "authtoken": authToken});
             res.redirect("/homepage");
             
         }   catch (error)   {
@@ -237,7 +233,7 @@ app.get(`/getallrecipesnorm`, fetchUser, async(req, res) => {
         res.status(200).json(data);
     }catch(error){
         console.error(error)
-        res.status(500).send(`Internal Server Error`)
+        res.status(500)
     }
 })
 
@@ -265,7 +261,7 @@ app.post(`/create`, fetchUser, async(req, res) => {
         res.status(200).json(saveDet);
     }catch(error){
         console.error(error)
-        res.status(500).send(`Internal Server Error`)
+        res.status(500)
     }
 })
 
@@ -276,16 +272,16 @@ app.get("/update",(req,res)=>{
 })
 
 //update a recipe
-app.put(`/update`, fetchUser, async(req, res) => {
+app.post(`/update`, fetchUser, async(req, res) => {
     try{
         const {title, content} = req.body
         
         let data = await recipe.findOne({title: req.body.title})
 
-        if (content)    data["content"] =   content
+        if (content)    data["content"] =   req.body.content
         
-        data = await recipe.findOne(
-            {title: req.body.title},
+        data = await recipe.findByIdAndUpdate(
+            {_id: data.id},
             {$set: data},
             {new: true}
         )
@@ -294,7 +290,7 @@ app.put(`/update`, fetchUser, async(req, res) => {
 
     }catch(error){
         console.error(error)
-        res.status(500).send(`Internal Server Error`)
+        res.status(500)
     }
 })
 
@@ -305,7 +301,7 @@ app.get("/delete",(req,res)=>{
 })
 
 //delete a recipe
-app.delete(`/delete`, fetchUser, async(req, res) => {
+app.post(`/delete`, fetchUser, async(req, res) => {
     try{
         const data = await recipe.findOneAndDelete({title: req.body.title})
 
@@ -314,7 +310,7 @@ app.delete(`/delete`, fetchUser, async(req, res) => {
         res.status(200).json(data);
     }catch(error){
         console.error(error)
-        res.status(500).send(`Internal Server Error`)
+        res.status(500)
     }
 })
 
