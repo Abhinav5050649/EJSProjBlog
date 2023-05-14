@@ -7,6 +7,10 @@ const {body, validationResult} = require("express-validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = `food123`
+const JWTStrategy = require('passport-jwt').Strategy
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const fs = require('fs');
+const path = require('path');
 
 const mongooseURL = `mongodb://localhost:27017`
 const mongoose = require("mongoose")
@@ -58,10 +62,16 @@ const blogSchema = new Schema({
 })
 const recipe = mongoose.model('foodrecipes', blogSchema)
 
-var authToken = null
+var authToken = ""
 // Configure Passport.js with the JWT strategy
 passport.use(new JWTStrategy({
-    jwtFromRequest: authToken,
+    //jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        ExtractJwt.fromHeader('authToken'),
+        ExtractJwt.fromUrlQueryParameter('authToken'),
+        ExtractJwt.fromBodyField('authToken')
+      ]),
     secretOrKey: JWT_SECRET
     }, (jwtPayload, done) => {
         const user1 = User.findById(jwtPayload.sub);
@@ -72,6 +82,10 @@ passport.use(new JWTStrategy({
     done(null, user1)
 }));
 
+const addToken = (req, res, next) => {
+    req.headers.authToken = authToken
+    next()
+}
 const fetchUser = (req, res, next) => {
     passport.authenticate('jwt', { session: false }, (err, user, info) => {
         if (err) {
@@ -208,7 +222,7 @@ app.get("/view",(req,res)=>{
 })
 
 //get recipes such that you find all posts by all users
-app.get(`/getallrecipes`, fetchUser, async(req, res) => {
+app.get(`/getallrecipes`, addToken, fetchUser, async(req, res) => {
     try{
         const limitValue = req.query.limit || 2;
         const skipValue = req.query.skip || 0;
@@ -227,7 +241,7 @@ app.get("/homepage",(req,res)=>{
 })
 
 //normal get recipes
-app.get(`/getallrecipesnorm`, fetchUser, async(req, res) => {
+app.get(`/getallrecipesnorm`, addToken, fetchUser, async(req, res) => {
     try{
         const data = await recipe.find({userId: req.user.id})
         res.status(200).json(data);
@@ -243,7 +257,7 @@ app.get("/create",(req,res)=>{
 })
 
 //create a recipe post
-app.post(`/create`, fetchUser, async(req, res) => {
+app.post(`/create`, addToken, fetchUser, async(req, res) => {
     try{
         console.log(`running`)
         const errors  = validationResult(req)
@@ -272,7 +286,7 @@ app.get("/update",(req,res)=>{
 })
 
 //update a recipe
-app.post(`/update`, fetchUser, async(req, res) => {
+app.post(`/update`, addToken, fetchUser, async(req, res) => {
     try{
         const {title, content} = req.body
         
@@ -301,7 +315,7 @@ app.get("/delete",(req,res)=>{
 })
 
 //delete a recipe
-app.post(`/delete`, fetchUser, async(req, res) => {
+app.post(`/delete`, addToken, fetchUser, async(req, res) => {
     try{
         const data = await recipe.findOneAndDelete({title: req.body.title})
 
@@ -314,11 +328,11 @@ app.post(`/delete`, fetchUser, async(req, res) => {
     }
 })
 
-app.get("/logout", (req, res) => {
+app.get('/logout', function(req, res, next) {
     authToken = null
-    req.logout()
-    res.redirect("/")
-})
+    res.render("signup")
+});
+
 app.listen(port, () => {
     console.log(`App listening on PORT: ${port}`)
 })

@@ -46,8 +46,8 @@
     </div>
   
     <script>
-        function fetchPosts() {
-        fetch('/getallrecipes')
+        async function fetchPosts() {
+        await fetch('/getallrecipes')
             .then(response => response.json())
             .then(data => {
             const postsContainer = document.querySelector('#posts-container');
