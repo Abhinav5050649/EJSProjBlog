@@ -47,7 +47,7 @@
   
     <script>
         async function fetchPosts() {
-        await fetch('/getallrecipes')
+        await fetch('/api/reci/all')
             .then(response => response.json())
             .then(data => {
             const postsContainer = document.querySelector('#posts-container');

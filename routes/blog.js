@@ -7,7 +7,7 @@ const { findByIdAndDelete } = require("../models/reci")
 
 //add pagination on header
 //get recipes such that you find all posts by all users
-router.get(`/getallrecipes`, fetchUser, async(req, res) => {
+router.get(`/all`, fetchUser, async(req, res) => {
     try{
         const limitValue = req.query.limit || 2;
         const skipValue = req.query.skip || 0;
@@ -21,7 +21,7 @@ router.get(`/getallrecipes`, fetchUser, async(req, res) => {
 })
 
 //normal get recipes
-router.get(`/getallrecipesnorm`, fetchUser, async(req, res) => {
+router.get(`/all/norm`, fetchUser, async(req, res) => {
     try{
         const data = await recipe.find({userId: req.user.id})
         res.status(200).json(data);
@@ -32,7 +32,7 @@ router.get(`/getallrecipesnorm`, fetchUser, async(req, res) => {
 })
 
 //create a recipe post
-router.post(`/createrecipe`, fetchUser, async(req, res) => {
+router.post(`/create`, fetchUser, async(req, res) => {
     try{
         console.log(`running`)
         const errors  = validationResult(req)
@@ -55,7 +55,7 @@ router.post(`/createrecipe`, fetchUser, async(req, res) => {
 })
 
 //update a recipe
-router.put(`/updaterecipe/:id`, fetchUser, async(req, res) => {
+router.put(`/update/:id`, fetchUser, async(req, res) => {
     try{
         const {title, content} = req.body
         
@@ -81,7 +81,7 @@ router.put(`/updaterecipe/:id`, fetchUser, async(req, res) => {
 })
 
 //delete a recipe
-router.delete(`/deleterecipe/:id`, fetchUser, async(req, res) => {
+router.delete(`/delete/:id`, fetchUser, async(req, res) => {
     try{
         const data = await recipe.findByIdAndDelete(req.params.id)
 

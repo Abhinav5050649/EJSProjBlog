@@ -13,9 +13,9 @@ app.use(cors())
 
 app.use(passport.initialize())
 app.use("/api/auth", require("./routes/auth"))
-app.use("/api/blog", require("./routes/blog"))
+app.use("/api/reci", require("./routes/blog"))
 
-app.get("/",(req,res)=>{
+app.get("/",(req, res)=>{
     res.render("signup")
 })
 
