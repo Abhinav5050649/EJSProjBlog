@@ -4,7 +4,7 @@ const recipe = require(`../models/reci`)
 const router = express.Router()
 const fetchUser = require(`../middleware/fetchuser`)
 const { findByIdAndDelete } = require("../models/reci")
-
+const User = require("../models/user")
 let userIdF = null  //user id obtained from signup
 
 //in all api routes below, add fetchUser after testing these apis
@@ -32,7 +32,9 @@ router.get("/homepage/:id", async(req, res) => {
 //normal get recipes
 router.get(`/homepage`, async(req, res) => {
     try{
-        const data = await recipe.findById({userId: userIdF})
+        const user = await User.findOne({email: "xyz1@gmail.com"})
+        userIdF = user.id
+        const data = await recipe.find({userId: userIdF})
         res.render("homepage", { data })
     }catch(error){
         console.error(error)
@@ -40,13 +42,17 @@ router.get(`/homepage`, async(req, res) => {
     }
 })
 
-app.get("/read/:id", async(req, res) => {
+router.get("/read/:id", async(req, res) => {
     const data = recipe.findById(req.params.id)
     res.render("read", { data })
 })
 
+router.get("/create", async(req, res) => {
+    res.render("create")
+})
+
 //create a recipe post
-router.post(`/create`, fetchUser, async(req, res) => {
+router.post(`/create`, async(req, res) => {
     try{
         const errors  = validationResult(req)
 
@@ -60,7 +66,7 @@ router.post(`/create`, fetchUser, async(req, res) => {
         const use = new recipe(data)
 
         const saveDet = await use.save()
-        res.status(200).json(saveDet);
+        console.log(saveDet)
         res.redirect("/api/reci/homepage")
 
     }catch(error){
@@ -98,7 +104,7 @@ router.post(`/update/:id`, async(req, res) => {
             {new: true}
         )
 
-        res.status(200).json(data)
+        console.log(data)
         res.redirect("/api/reci/homepage")
     }catch(error){
         console.error(error)
@@ -108,7 +114,7 @@ router.post(`/update/:id`, async(req, res) => {
 
 router.get("/delete", async(req, res) => {
     try{
-        const data = await recipe.findById({userId: userIdF})
+        const data = await recipe.find({userId: userIdF})
         res.render("delete", { data })
     }   catch(error)    {
         console.error(error)
@@ -123,7 +129,7 @@ router.get(`/delete/:id`, async(req, res) => {
 
         if (!data)  res.status(404).send(`Internal Server Error`)
 
-        res.status(200).json(data);
+        console.log(data)
         res.redirect("/api/reci/homepage")
     }catch(error){
         console.error(error)
@@ -131,7 +137,7 @@ router.get(`/delete/:id`, async(req, res) => {
     }
 })
 
-app.get('/logout', (req, res) => {
+router.get('/logout', (req, res) => {
     userIdF = null
     res.redirect("/")
 });

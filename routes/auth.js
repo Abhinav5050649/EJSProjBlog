@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fetchUser = require("../middleware/fetchuser");
 const JWT_SECRET = `food123`;
-
+let userIdF = require("./blog")
 router.get("/",(req, res)=>{
     res.render("signup")
 })
@@ -54,7 +54,7 @@ router.post(`/create/user`,
                 }
             };
 
-            res.json({"success": true, "authtoken": authToken});
+            console.log({"success": true});
             res.redirect("/api/auth/login");
         }   catch (error) {
             console.error(error);
@@ -71,20 +71,18 @@ router.post(`/check/login`,
 ], async(req, res) => {
         try{
             const user = await User.findOne({"email": req.body.email})
-
             if (!user)
             {
                 return res.status(400).json({"success": false})
             }
-            const salt = await bcrypt.genSalt(10);
-            const secPass = await bcrypt.hash(req.body.password, salt);
-            
-            if (secPass !== user.password){
+            const passCompare = bcrypt.compare(user.password, req.body.password)
+            // console.log(passCompare)
+            if (!passCompare){
                 return res.status(400).json({"success": false})
             }
 
-            res.status(200).json({"success": true});
-            res.redirect(`/api/reci/homepage/:${user._id}`);
+            console.log({"success": true});
+            res.redirect(`/api/reci/homepage`);
             
         }   catch (error)   {
             console.error(error);
