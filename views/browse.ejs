@@ -1,11 +1,12 @@
 <%- include("partials/head.ejs") %>
 <body>
     <%- include("partials/fnav.ejs")  %>
-    <h3>Click on title to delete!</h3>
+    <h3>Read all posts!</h3>
     <hr/>
     <div class="container">
       <% for (item in data){  %>
-        <h4><a href="/api/reci/delete/:<%=item.id%>"><%=item.title%></a></h4>
+        <h4><%=item.title%></h4>
+        <p><%= item.content %></p>
         <br/>
       <% }  %>
     </div>
