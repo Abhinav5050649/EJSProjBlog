@@ -1,10 +1,13 @@
 const LocalStrategy = require("passport-local").Strategy;
-const User = require("./models/userDetails")
+const User = require("./models/user")
 
 exports.initializingPassport = (passport) => {
     passport.use(new LocalStrategy( async(username, password, done) => {
         try{
-            const user = await User.findOne({username})
+            console.log("running")
+            console.log(username)
+            const user = await User.findOne({username: username})
+            console.log(user)
             if (!user)  return done(null, false)
             if (user.password !== password) return done(null, false)
 

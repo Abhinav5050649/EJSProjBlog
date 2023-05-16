@@ -1,9 +1,9 @@
 const express = require("express");
-const user = require("../models/userDetails");
+const user = require("../models/user");
 const {body, validationResult} = require("express-validator");
 const router = express.Router();
 const passport = require("passport")
-const User = require("../models/userDetails")
+const User = require("../models/user")
 
 router.get("/",(req, res)=>{
     //res.render("signup")

@@ -6,7 +6,7 @@ const connectToMongo = require("./db");
 const path = require("path")
 const passport = require("passport")
 const session = require('express-session')
-const User = require("./models/userDetails")
+const User = require("./models/user")
 const LocalStrategy = require('passport-local')
 const {initializingPassport} = require("./passportConfig")
 
@@ -28,9 +28,6 @@ app.use(
       secret: 'food123', // secret key to sign our session
       resave: false,
       saveUninitialized: false,
-      cookie: {
-        maxAge: 1000 * 60 * 60 * 24, // TTL for the session
-      },
     })
 );
 app.use(passport.initialize());
@@ -48,30 +45,26 @@ app.get("/api/auth",(req, res)=>{
     res.render("signup")
 })
 
-router.get("/api/auth/login",(req, res)=>{
-    if (!req.user)
-        res.render("login");
-    else 
-        res.redirect("/api/reci/homepage")
+app.get("/api/auth/login",(req, res)=>{
+    res.render("login")
 })
 
 //create user --> works
-app.post(`/api/auth/create/user`, 
-[
-    body("email").isEmail(),
-    body("password").isLength({min: 5}),
-],
-async(req, res) => {
+app.post(`/api/auth/createuser`, async(req, res) => {
     const user = User.findOne({username: req.body.username})
+    console.log(user)
     if (user)   res.redirect("/api/auth/login")
     else{
-        const saveDets = await User.create(req.body)
+        let data = {username: req.body.username, 
+        password: req.body.password}
+        const saveDets = await User.create(data)
+        console.log(saveDets)
         res.redirect("/api/auth/login")
     }
 });
 
 //for login --> 
-app.post("/api/auth/check/login", passport.authenticate("local", {failureRedirect: "/api/auth/login", successRedirect: "/api/reci/homepage"}))
+app.post("/api/auth/check/login", passport.authenticate("local", {failureRedirect: "/api/auth/login", successRedirect: "/api/reci/"}))
 // router.post("/api/auth/check/login", function(req, res){
 // const user = new User({
 //     username: req.body.email,

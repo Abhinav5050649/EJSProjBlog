@@ -2,7 +2,7 @@ const path = require('node:path'); // path module to find absolute paths on the 
 const fs = require('node:fs'); // file system module to manipulate files
 const passport = require('passport'); // the main star of the show
 const LocalStrategy = require('passport-local'); // the co-protagonist in this sequel 
-const User = require("../models/userDetails");
+const User = require("../models/user");
 // //const dbpath = path.join(__dirname, 'db.json'); // path to our custom in-house json database
 
 // const fetchUser = (email, password, done) => {

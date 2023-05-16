@@ -12,12 +12,7 @@
 <body>
   <%- include("partials/inav.ejs") %>
     <div class="container">
-        <form action="/api/auth/create/user" method="post">
-            <!-- <div class="form-group">
-                <label for="exampleFormControlInput1">Name</label>
-                <input type="text" class="form-control" id="exampleFormControlInput1" name=
-                "name" placeholder="Name">
-            </div>  -->
+        <form action="/api/auth/createuser" method="post">
             <div class="form-group">
               <label for="exampleFormControlInput1">Email address</label>
               <input type="email" class="form-control" id="exampleFormControlInput1" name="username" placeholder="name@example.com">

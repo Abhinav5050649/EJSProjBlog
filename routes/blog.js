@@ -4,7 +4,7 @@ const recipe = require(`../models/reci`)
 const router = express.Router()
 const fetchUser = require(`../middleware/fetchuser`)
 const { findByIdAndDelete } = require("../models/reci")
-const User = require("../models/userDetails")
+const User = require("../models/user")
 let userIdF = null  //user id obtained from signup
 
 const checkAuthenticated = (req, res, next) => {
@@ -30,7 +30,7 @@ router.get(`/browse`, checkAuthenticated, async(req, res) => {
 })
 
 //normal get recipes
-router.get(`/homepage`, checkAuthenticated, async(req, res) => {
+router.get(`/`, checkAuthenticated, async(req, res) => {
     try{
         //const user = await User.findById(req.user.id)
         const data = await recipe.find({userId: req.user.id})
@@ -66,7 +66,7 @@ router.post(`/create`, checkAuthenticated, async(req, res) => {
 
         const saveDet = await use.save()
         console.log(saveDet)
-        res.redirect("/api/reci/homepage")
+        res.redirect("/api/reci/")
 
     }catch(error){
         console.error(error)
@@ -104,7 +104,7 @@ router.post(`/update/:id`, checkAuthenticated, async(req, res) => {
         )
 
         console.log(data)
-        res.redirect("/api/reci/homepage")
+        res.redirect("/api/reci/")
     }catch(error){
         console.error(error)
         res.status(500).json({"message": "Internal Server Error"})
@@ -129,7 +129,7 @@ router.get(`/delete/:id`, async(req, res) => {
         if (!data)  res.status(404).send(`Internal Server Error`)
 
         console.log(data)
-        res.redirect("/api/reci/homepage")
+        res.redirect("/api/reci/")
     }catch(error){
         console.error(error)
         res.status(500).json({"message": "Internal Server Error"})
@@ -138,7 +138,7 @@ router.get(`/delete/:id`, async(req, res) => {
 
 router.get('/logout', (req, res) => {
     req.logOut()
-    res.redirect("/")
+    res.redirect("/api/auth")
 });
 
 module.exports = router
