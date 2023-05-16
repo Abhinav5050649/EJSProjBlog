@@ -18,10 +18,7 @@ const checkAuthenticated = (req, res, next) => {
 //get recipes such that you find all posts by all users
 router.get(`/browse`, checkAuthenticated, async(req, res) => {
     try{
-        const limitValue = req.query.limit || 2;
-        const skipValue = req.query.skip || 0;
-        const data = await recipe.find().limit(limitValue).skip(skipValue);
-        
+        const data = await recipe.find();
         res.render("browse", { data })
     }catch(error){
         console.error(error)
@@ -30,10 +27,12 @@ router.get(`/browse`, checkAuthenticated, async(req, res) => {
 })
 
 //normal get recipes
-router.get(`/`, checkAuthenticated, async(req, res) => {
+router.get(`/homepage`, checkAuthenticated, async(req, res) => {
     try{
         //const user = await User.findById(req.user.id)
+        console.log(req.user.id)
         const data = await recipe.find({userId: req.user.id})
+        console.log(data)
         res.render("homepage", { data })
     }catch(error){
         console.error(error)
@@ -42,7 +41,7 @@ router.get(`/`, checkAuthenticated, async(req, res) => {
 })
 
 router.get("/read/:id", checkAuthenticated, async(req, res) => {
-    const data = recipe.findById(req.params.id)
+    const data = await recipe.findById(req.params.id)
     res.render("read", { data })
 })
 
@@ -62,11 +61,9 @@ router.post(`/create`, checkAuthenticated, async(req, res) => {
         if (req.body.title)   data["title"]    =   req.body.title
         if (req.body.content)    data["content"] =   req.body.content
 
-        const use = new recipe(data)
-
-        const saveDet = await use.save()
-        console.log(saveDet)
-        res.redirect("/api/reci/")
+        const use = await recipe.create(data)
+        console.log(use)
+        res.redirect("/api/reci/homepage")
 
     }catch(error){
         console.error(error)
@@ -104,7 +101,7 @@ router.post(`/update/:id`, checkAuthenticated, async(req, res) => {
         )
 
         console.log(data)
-        res.redirect("/api/reci/")
+        res.redirect("/api/reci/homepage")
     }catch(error){
         console.error(error)
         res.status(500).json({"message": "Internal Server Error"})
@@ -124,12 +121,15 @@ router.get("/delete", checkAuthenticated, async(req, res) => {
 //delete a recipe
 router.get(`/delete/:id`, async(req, res) => {
     try{
-        const data = await recipe.findByIdAndDelete(req.params.id)
+        const data = await recipe.findById(req.params.id)
 
         if (!data)  res.status(404).send(`Internal Server Error`)
 
         console.log(data)
-        res.redirect("/api/reci/")
+
+        const ans = await recipe.deleteOne(data)
+        
+        res.redirect("/api/reci/homepage")
     }catch(error){
         console.error(error)
         res.status(500).json({"message": "Internal Server Error"})
@@ -137,7 +137,6 @@ router.get(`/delete/:id`, async(req, res) => {
 })
 
 router.get('/logout', (req, res) => {
-    req.logOut()
     res.redirect("/api/auth")
 });
 

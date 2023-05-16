@@ -51,34 +51,22 @@ app.get("/api/auth/login",(req, res)=>{
 
 //create user --> works
 app.post(`/api/auth/createuser`, async(req, res) => {
-    const user = User.findOne({username: req.body.username})
-    console.log(user)
+    const user = await User.findOne({username: req.body.username})
     if (user)   res.redirect("/api/auth/login")
     else{
-        let data = {username: req.body.username, 
-        password: req.body.password}
+        let data = {
+            username: req.body.username, 
+            password: req.body.password,
+        }
+        console.log(data)
         const saveDets = await User.create(data)
-        console.log(saveDets)
+        //console.log(saveDets)
         res.redirect("/api/auth/login")
     }
 });
 
 //for login --> 
-app.post("/api/auth/check/login", passport.authenticate("local", {failureRedirect: "/api/auth/login", successRedirect: "/api/reci/"}))
-// router.post("/api/auth/check/login", function(req, res){
-// const user = new User({
-//     username: req.body.email,
-//     password: req.body.password
-// })
-// req.login(user, function(err) {
-//     if (err) {
-//       console.log(err);
-//     } else {
-//       passport.authenticate("local")(req, res, function() {
-//         res.redirect("/api/reci/homepage")
-//       })
-//     }
-// })})
+app.post("/api/auth/check/login", passport.authenticate("local", {failureRedirect: "/api/auth/login", successRedirect: "/api/reci/homepage"}))
 
 app.use("/api/reci", require("./routes/blog"))
 

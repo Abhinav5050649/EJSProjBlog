@@ -3,7 +3,7 @@
   <%- include("partials/fnav.ejs")  %>
 
     <div class="container">
-      <form action="/api/reci/update/:<%= data.id %>" method="post">
+      <form action="/api/reci/update/<%= data.id %>" method="post">
         <h3 class="title">UPDATE POST</h3>
         <div class="psuedoInputBox">
             <span>Title: <%= data.title %></span>
