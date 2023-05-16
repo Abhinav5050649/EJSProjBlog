@@ -4,12 +4,12 @@ const recipe = require(`../models/reci`)
 const router = express.Router()
 const fetchUser = require(`../middleware/fetchuser`)
 const { findByIdAndDelete } = require("../models/reci")
-const User = require("../models/user")
+const User = require("../models/userDetails")
 let userIdF = null  //user id obtained from signup
 
 const checkAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) { return next() }
-    else    res.redirect("/")
+    else    res.redirect("")
 }
 
 //in all api routes below, add fetchUser after testing these apis

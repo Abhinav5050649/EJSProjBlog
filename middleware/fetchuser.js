@@ -2,48 +2,48 @@ const path = require('node:path'); // path module to find absolute paths on the 
 const fs = require('node:fs'); // file system module to manipulate files
 const passport = require('passport'); // the main star of the show
 const LocalStrategy = require('passport-local'); // the co-protagonist in this sequel 
-const User = require("../models/user");
+const User = require("../models/userDetails");
 // //const dbpath = path.join(__dirname, 'db.json'); // path to our custom in-house json database
 
-const fetchUser = (email, password, done) => {
-    const user = User.find({email: email})
-    if (!user)
-    {
-      done(null, false);
-    }
-    else if (!(user.password === password))
-    {
-      done(null, false);
-    }
-    else{
-      done(null, user);
-    }
-}
+// const fetchUser = (email, password, done) => {
+//     const user = User.find({email: email})
+//     if (!user)
+//     {
+//       done(null, false);
+//     }
+//     else if (!(user.password === password))
+//     {
+//       done(null, false);
+//     }
+//     else{
+//       done(null, user);
+//     }
+// }
 
-passport.serializeUser((user, done) => { 
-  console.log(user)     
-  done(null, user.id)
+// passport.serializeUser((user, done) => { 
+//   console.log(user)     
+//   done(null, user.id)
 
-// Passport will pass the authenticated_user to serializeUser as "user" 
-// This is the USER object from the done() in auth function
-// Now attach using done (null, user.id) tie this user to the req.session.passport.user = {id: user.id}, 
-// so that it is tied to the session object
-} )
+// // Passport will pass the authenticated_user to serializeUser as "user" 
+// // This is the USER object from the done() in auth function
+// // Now attach using done (null, user.id) tie this user to the req.session.passport.user = {id: user.id}, 
+// // so that it is tied to the session object
+// } )
 
 
-passport.deserializeUser((id, done) => {
-      console.log(id)
-      const user = User.findById(id)
+// passport.deserializeUser((id, done) => {
+//       console.log(id)
+//       const user = User.findById(id)
       
-      if (user)
-        done(null, user)  
-      else
-        done(null, false)    
-// This is the id that is saved in req.session.passport.{ user: "id"} during the serialization
-// use the id to find the user in the DB and get the user object with user details
-// pass the USER object in the done() of the de-serializer
-// this USER object is attached to the "req.user", and can be used anywhere in the App.
-}) 
+//       if (user)
+//         done(null, user)  
+//       else
+//         done(null, false)    
+// // This is the id that is saved in req.session.passport.{ user: "id"} during the serialization
+// // use the id to find the user in the DB and get the user object with user details
+// // pass the USER object in the done() of the de-serializer
+// // this USER object is attached to the "req.user", and can be used anywhere in the App.
+// }) 
 
 // passport.serializeUser((user, done) => { 
 //   done(null, user.id);
@@ -92,4 +92,4 @@ passport.deserializeUser((id, done) => {
 //   })
 // );
 
-modeule.exports = fetchUser;
+//module.exports = fetchUser;
