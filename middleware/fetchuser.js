@@ -1,79 +1,95 @@
-const passport = require('passport')
-const passportJWT = require('passport-jwt')
-const JWTStrategy = passportJWT.Strategy
-const ExtractJWT = passportJWT.ExtractJwt
-const jwt = require('jsonwebtoken')
-const JWT_SECRET = 'food123'
-const User = require('../models/user')
+const path = require('node:path'); // path module to find absolute paths on the system 
+const fs = require('node:fs'); // file system module to manipulate files
+const passport = require('passport'); // the main star of the show
+const LocalStrategy = require('passport-local'); // the co-protagonist in this sequel 
+const User = require("../models/user");
+// //const dbpath = path.join(__dirname, 'db.json'); // path to our custom in-house json database
 
-// Configure Passport.js with the JWT strategy
-passport.use(new JWTStrategy({
-  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: JWT_SECRET
-}, (jwtPayload, done) => {
-    const user1 = User.findById(jwtPayload.sub);
-    if (!user1) {
-        return done(null, false);
+const fetchUser = (email, password, done) => {
+    const user = User.find({email: email})
+    if (!user)
+    {
+      done(null, false);
     }
-  //done(null, jwtPayload.user); // Assuming the user information is stored in jwtPayload.user
-  done(null, user1)
-}));
-
-const fetchUser = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
-    if (err) {
-      return res.status(500).send({ error: 'Internal Server Error' });
+    else if (!(user.password === password))
+    {
+      done(null, false);
     }
-
-    if (!user) {
-      return res.status(401).send({ error: 'Faulty Authentication' });
+    else{
+      done(null, user);
     }
-
-    req.user = user;
-    next();
-  })(req, res, next);
-};
-
-module.exports = fetchUser;
-
-/*
-var authToken = ""
-// Configure Passport.js with the JWT strategy
-passport.use(new JWTStrategy({
-    //jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    jwtFromRequest: ExtractJwt.fromExtractors([
-        ExtractJwt.fromAuthHeaderAsBearerToken(),
-        ExtractJwt.fromHeader('authToken'),
-        ExtractJwt.fromUrlQueryParameter('authToken'),
-        ExtractJwt.fromBodyField('authToken')
-      ]),
-    secretOrKey: JWT_SECRET
-    }, (jwtPayload, done) => {
-        const user1 = User.findById(jwtPayload.sub);
-        if (!user1) {
-            return done(null, false);
-        }
-    //done(null, jwtPayload.user); // Assuming the user information is stored in jwtPayload.user
-    done(null, user1)
-}));
-
-const addToken = (req, res, next) => {
-    req.headers("authToken") = authToken
-    next()
 }
 
-const fetchUser = (req, res, next) => {
-    passport.authenticate('jwt', { session: false }, (err, user, info) => {
-        if (err) {
-        return res.status(500).send({ error: 'Internal Server Error' });
-        }
+passport.serializeUser((user, done) => { 
+  console.log(user)     
+  done(null, user.id)
 
-        if (!user) {
-        return res.status(401).send({ error: 'Faulty Authentication' });
-        }
+// Passport will pass the authenticated_user to serializeUser as "user" 
+// This is the USER object from the done() in auth function
+// Now attach using done (null, user.id) tie this user to the req.session.passport.user = {id: user.id}, 
+// so that it is tied to the session object
+} )
 
-        req.user = user;
-        next();
-    })(req, res, next);
-};
-*/
+
+passport.deserializeUser((id, done) => {
+      console.log(id)
+      const user = User.findById(id)
+      
+      if (user)
+        done(null, user)  
+      else
+        done(null, false)    
+// This is the id that is saved in req.session.passport.{ user: "id"} during the serialization
+// use the id to find the user in the DB and get the user object with user details
+// pass the USER object in the done() of the de-serializer
+// this USER object is attached to the "req.user", and can be used anywhere in the App.
+}) 
+
+// passport.serializeUser((user, done) => { 
+//   done(null, user.id);
+// });
+
+// passport.deserializeUser((id, done) => {
+//   if (!fs.existsSync(dbpath)) { // if db does not exist, create db
+//     fs.writeFileSync(dbpath, JSON.stringify({ users: [] }));
+//   }
+
+//   const db = JSON.parse(fs.readFileSync(dbpath, { encoding: 'utf-8' }));
+
+//   let user = db.users.find((item) => item.id === id);
+
+//   if (!user) {
+//     done(new Error('Failed to deserialize'));
+//   }
+
+//   done(null, user);
+// });
+
+// passport.use(
+//   new LocalStrategy(async (username, password, done) => {
+//     if (!fs.existsSync(dbpath)) { // if db.json does not exist yet, we create it
+//       fs.writeFileSync(dbpath, JSON.stringify({ users: [] }));
+//     }
+
+//     const db = JSON.parse(fs.readFileSync(dbpath, { encoding: 'utf-8' }));
+
+//     let user = db.users.find((item) => {
+//       return item.username === username && item.password === password;
+//     });
+
+//     if (!user) {
+//       user = {
+//         id: Math.floor(Math.random() * 1000), // generate random id between numbers 1 - 999
+//         username,
+//         password,
+//       };
+
+//       db.users.push(user);
+//       fs.writeFileSync(dbpath, JSON.stringify(db));
+//     }
+
+//     done(null, user);
+//   })
+// );
+
+modeule.exports = fetchUser;

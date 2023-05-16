@@ -2,13 +2,20 @@ const express = require("express");
 const User = require("../models/user");
 const {body, validationResult} = require("express-validator");
 const router = express.Router();
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+//const bcrypt = require("bcrypt");
+//const jwt = require("jsonwebtoken");
 const fetchUser = require("../middleware/fetchuser");
-const JWT_SECRET = `food123`;
-let userIdF = require("./blog")
+//const JWT_SECRET = `food123`;
+const passport = require("passport")
+
 router.get("/",(req, res)=>{
-    res.render("signup")
+    //res.render("signup")
+    if (!req.user) {
+        // if passport does not have record of this user, we redirect them to the authentication page
+        res.redirect("/login")
+    } else {
+        res.render('/api/reci/homepage', { user: req.user });
+    }
 })
 
 router.get("/login",(req,res)=>{
@@ -16,6 +23,7 @@ router.get("/login",(req,res)=>{
 })
 
 //create user --> works
+/*
 router.post(`/create/user`, 
 [
     body("name").isLength({min: 3}),
@@ -62,8 +70,16 @@ router.post(`/create/user`,
         }
     }
 );
+*/
 
 //for login --> works
+router.post("/check/login", passport.authenticate('local', {
+    // on Initial login, passport will redirect to either of these routes
+    successRedirect: '/api/reci/homepage',
+    failureRedirect: '/',
+}))
+
+/*
 router.post(`/check/login`, 
 [
     body("email").isEmail(),
@@ -90,5 +106,5 @@ router.post(`/check/login`,
         }
     }
 )
-
+*/
 module.exports = router;

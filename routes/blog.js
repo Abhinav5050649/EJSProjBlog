@@ -7,11 +7,16 @@ const { findByIdAndDelete } = require("../models/reci")
 const User = require("../models/user")
 let userIdF = null  //user id obtained from signup
 
+const checkAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) { return next() }
+    else    res.redirect("/")
+}
+
 //in all api routes below, add fetchUser after testing these apis
 
 //add pagination on header
 //get recipes such that you find all posts by all users
-router.get(`/browse`, async(req, res) => {
+router.get(`/browse`, checkAuthenticated, async(req, res) => {
     try{
         const limitValue = req.query.limit || 2;
         const skipValue = req.query.skip || 0;
@@ -24,17 +29,11 @@ router.get(`/browse`, async(req, res) => {
     }
 })
 
-router.get("/homepage/:id", async(req, res) => {
-    userIdF = req.params.id
-    res.redirect("/api/reci/homepage")
-})
-
 //normal get recipes
-router.get(`/homepage`, async(req, res) => {
+router.get(`/homepage`, checkAuthenticated, async(req, res) => {
     try{
-        const user = await User.findOne({email: "xyz1@gmail.com"})
-        userIdF = user.id
-        const data = await recipe.find({userId: userIdF})
+        //const user = await User.findById(req.user.id)
+        const data = await recipe.find({userId: req.user.id})
         res.render("homepage", { data })
     }catch(error){
         console.error(error)
@@ -42,24 +41,24 @@ router.get(`/homepage`, async(req, res) => {
     }
 })
 
-router.get("/read/:id", async(req, res) => {
+router.get("/read/:id", checkAuthenticated, async(req, res) => {
     const data = recipe.findById(req.params.id)
     res.render("read", { data })
 })
 
-router.get("/create", async(req, res) => {
+router.get("/create", checkAuthenticated, async(req, res) => {
     res.render("create")
 })
 
 //create a recipe post
-router.post(`/create`, async(req, res) => {
+router.post(`/create`, checkAuthenticated, async(req, res) => {
     try{
         const errors  = validationResult(req)
 
         if (!errors.isEmpty())  return res.status(400).json({errors: errors.array()})
         
         let data = {}
-        data["userId"] = userIdF
+        data["userId"] = req.user.id
         if (req.body.title)   data["title"]    =   req.body.title
         if (req.body.content)    data["content"] =   req.body.content
 
@@ -76,7 +75,7 @@ router.post(`/create`, async(req, res) => {
 })
 
 //get update page
-router.get("/update/:id", async(req, res) => {
+router.get("/update/:id", checkAuthenticated, async(req, res) => {
     try{
         const data = await recipe.findById(req.params.id)
         res.render("update", { data })
@@ -87,7 +86,7 @@ router.get("/update/:id", async(req, res) => {
 })
 
 //update a recipe
-router.post(`/update/:id`, async(req, res) => {
+router.post(`/update/:id`, checkAuthenticated, async(req, res) => {
     try{
         const {title, content} = req.body
         
@@ -112,9 +111,9 @@ router.post(`/update/:id`, async(req, res) => {
     }
 })
 
-router.get("/delete", async(req, res) => {
+router.get("/delete", checkAuthenticated, async(req, res) => {
     try{
-        const data = await recipe.find({userId: userIdF})
+        const data = await recipe.find({userId: req.user.id})
         res.render("delete", { data })
     }   catch(error)    {
         console.error(error)
@@ -138,7 +137,7 @@ router.get(`/delete/:id`, async(req, res) => {
 })
 
 router.get('/logout', (req, res) => {
-    userIdF = null
+    req.logOut()
     res.redirect("/")
 });
 
