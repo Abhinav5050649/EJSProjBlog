@@ -40,11 +40,13 @@ router.get(`/homepage`, checkAuthenticated, async(req, res) => {
     }
 })
 
+//Will render read.ejs page
 router.get("/read/:id", checkAuthenticated, async(req, res) => {
     const data = await recipe.findById(req.params.id)
     res.render("read", { data })
 })
 
+//will render create.ejs page
 router.get("/create", checkAuthenticated, async(req, res) => {
     res.render("create")
 })
