@@ -1,18 +1,19 @@
 <%- include("partials/head.ejs") %>
 <body>
   <%- include("partials/fnav.ejs")  %>
-
+  <br/>
+  <h1 class="display-4">UPDATE POST</h1>
+  <hr/>
     <div class="container">
       <form action="/api/reci/update/<%= data.id %>" method="post">
-        <h3 class="title">UPDATE POST</h3>
-        <div class="psuedoInputBox">
-            <span>Title: <%= data.title %></span>
+        <div class="form-group">
+          <label for="formGroupExampleInput">Title: <%= data.title %></label>
         </div>
-        <div class="inputBox">
-            <span>Content: </span>
-            <input type="text" placeholder="xyz" autocomplete="off" name="content" required>
+        <div class="form-group">
+          <label for="formGroupExampleInput">Content: </label>
+          <input type="text" class="form-control" id="formGroupExampleInput" placeholder="This is a test dish" autocomplete="off" name="content" required>
         </div>
-        <input type="submit" class="submit-btn">
+        <button type="submit" class="btn btn-primary">Submit</button>
       </form>
     </div>
 

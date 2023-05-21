@@ -11,8 +11,6 @@ const LocalStrategy = require('passport-local')
 const {initializingPassport} = require("./passportConfig")
 
 connectToMongo()
-//require("passport-local") // passport strategy will listen to every request
-
 
 app.use(express.json())
 app.use(cors())
@@ -32,19 +30,18 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-// passport.use(User.createStrategy());
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
 
+//this will redirect user to signup page from base link
 app.get("", (req, res) => {
     res.redirect("/api/auth/")
 })
 
+//for signup
 app.get("/api/auth",(req, res)=>{
-    //res.render("signup")
     res.render("signup")
 })
 
+//for login
 app.get("/api/auth/login",(req, res)=>{
     res.render("login")
 })
@@ -68,6 +65,7 @@ app.post(`/api/auth/createuser`, async(req, res) => {
 //for login --> 
 app.post("/api/auth/check/login", passport.authenticate("local", {failureRedirect: "/api/auth/login", successRedirect: "/api/reci/homepage"}))
 
+//for all aspects related to blog posts
 app.use("/api/reci", require("./routes/blog"))
 
 
